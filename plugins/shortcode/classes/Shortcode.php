@@ -177,6 +177,7 @@ class Shortcode
         // allow [[foo]] syntax for escaping a tag
         if ($m[1] == '[' && $m[6] == ']') {
             return substr($m[0], 1, -1);
+            //return $m[0];
         }
 
         $tag = $m[2];

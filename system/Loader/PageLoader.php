@@ -106,7 +106,7 @@ class PageLoader
         $yaml = '';
         $segments = [];
 
-        $matched = preg_match('/^['.UTF8_BOM.']*-{3}\r?\n(.*)\r?\n-{3}\R(.*)/ms', $content, $matches);
+        $matched = preg_match('/^['.UTF8_BOM.']*-{3}\r?\n(.*)\r?\n-{3}\R(.*?)/msU', $content, $matches);
 
         if ($matched === 1 && count($matches) == 3) {
             $yaml = $matches[1];
