@@ -37,7 +37,7 @@ class FileFilterCallback
     public function call(\SplFileInfo $file)
     {
         $firstChar = substr($file->getFileName(), 0, 1);
-        if (in_array($firstChar, ['.', '_'])) {
+        if (in_array($firstChar, ['.'])) {
             return false;
         }
 

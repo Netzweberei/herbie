@@ -34,7 +34,7 @@ class ShortcodePlugin
         $this->addLinkTag();
         $this->addEmailTag();
         $this->addTelTag();
-        $this->addImageTag();
+//        $this->addImageTag();
         $this->addFileTag();
         $this->addListingTag();
         $this->addBlocksTag();
@@ -209,7 +209,8 @@ class ShortcodePlugin
             $twig = DI::get('Twig');
 
             // store page
-            $page = DI::get('Page');
+            $mainpage = DI::get('Page');
+            $mainpath = $mainpage->getPath();
 
             $return = '';
 
@@ -217,7 +218,8 @@ class ShortcodePlugin
 
                 $block = Herbie\Page::create($item->path);
 
-                DI::set('Page', $block);
+                $twig->getEnvironment()->getExtension('herbie')->setPage($block);
+                DI::get('Page')->load($item->path);
 
                 // self-contained blocks aka widgets
                 if (!empty($block->layout) && file_exists($paths[$path].'/.layouts/'.$block->layout)) {
@@ -234,8 +236,8 @@ class ShortcodePlugin
             }
 
             // restore page
-            $twig->getEnvironment()->getExtension('herbie')->setPage($page);
-            DI::set('Page', $page);
+            DI::get('Page')->load($mainpath);
+            $twig->getEnvironment()->getExtension('herbie')->setPage($mainpage);
 
             return trim($return);
         });
