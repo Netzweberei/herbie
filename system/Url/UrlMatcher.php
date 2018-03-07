@@ -50,6 +50,10 @@ class UrlMatcher
      */
     public function match($route)
     {
+        $route = strtr($route, [
+            '/index.md' => ''
+        ]);
+
         // Page
         $item = $this->pages->getItem($route);
         if (isset($item)) {
