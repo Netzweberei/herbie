@@ -44,7 +44,6 @@ class TwigPlugin
         $this->twig->getEnvironment()->getExtension('herbie')->setPage($page);
         return $this->twig->render($page->layout);
     }
-
 }
 
 (new TwigPlugin)->install();

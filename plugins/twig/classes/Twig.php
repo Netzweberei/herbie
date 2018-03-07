@@ -231,6 +231,7 @@ class Twig
         } elseif ($this->config->get('theme') == 'default') {
             $paths[] = $this->config->get('layouts.path') . '/default';
         } else {
+            // fallback to default-layout, like ezPublish
             $paths[] = $this->config->get('layouts.path') . '/' . $this->config->get('theme');
             $paths[] = $this->config->get('layouts.path') . '/default';
         }
