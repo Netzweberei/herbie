@@ -37,6 +37,7 @@ class FileFilterCallback
     public function call(\SplFileInfo $file)
     {
         $firstChar = substr($file->getFileName(), 0, 1);
+        // allow hidden files, i.e files with leading underscore ('_test.md')
         if (in_array($firstChar, ['.'])) {
             return false;
         }
