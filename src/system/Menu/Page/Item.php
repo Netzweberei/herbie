@@ -36,6 +36,14 @@ class Item implements ItemInterface
     /**
      * @return string
      */
+    public function getLanguage()
+    {
+        return trim($this->data['language']);
+    }
+
+    /**
+     * @return string
+     */
     public function getRoute()
     {
         return trim($this->data['route']);
