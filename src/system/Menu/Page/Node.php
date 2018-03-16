@@ -30,7 +30,7 @@ class Node extends \Herbie\Node
         $tree = new self();
         foreach ($menuCollection as $menuItem) {
             $route = $menuItem->getParentRoute();
-            $node = $tree->findByRoute($route);
+            $node = $tree->findByRoute($route, $menuItem->getLanguage());
             if ($node) {
                 $node->addChild(new self($menuItem));
             }
@@ -50,9 +50,9 @@ class Node extends \Herbie\Node
      * @param string $route
      * @return Node|bool
      */
-    public function findByRoute($route)
+    public function findByRoute($route, $lang = 'default')
     {
-        if (empty($route)) {
+        if (empty($route) || $route == $lang ) {
             return $this->root();
         }
         $menuItem = $this->getMenuItem();

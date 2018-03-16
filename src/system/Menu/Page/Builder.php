@@ -69,11 +69,13 @@ class Builder
     /**
      * @return Collection
      */
-    public function buildCollection()
+    public function buildCollection($customPath=false)
     {
+        $_paths = $customPath ? $customPath : $this->paths;
+
         $collection = $this->restoreCollection();
-        if (!$collection->fromCache) {
-            foreach ($this->paths as $alias => $path) {
+        if (!$collection->fromCache || $customPath) {
+            foreach ($_paths as $alias => $path) {
 
                 $this->indexFiles = [];
                 foreach ($this->getIterator($path) as $fileInfo) {
@@ -84,7 +86,7 @@ class Builder
                             $this->indexFiles[] = $indexFile;
                             $relPathname = $fileInfo->getRelativePathname() . '/' . basename($indexFile);
                             $item = $this->createItem($indexFile, $relPathname, $alias);
-                            $collection->addItem($item);
+                            if($item) $collection->addItem($item);
                             break;
                         }
                         // other files
@@ -93,12 +95,14 @@ class Builder
                             continue;
                         }
                         $item = $this->createItem($fileInfo->getPathname(), $fileInfo->getRelativePathname(), $alias);
-                        $collection->addItem($item);
+                        if($item) $collection->addItem($item);
                     }
                 }
 
             }
+            if(!$customPath) {
             $this->storeCollection($collection);
+        }
         }
         return $collection;
     }
@@ -177,6 +181,19 @@ class Builder
         $trimExtension = empty($data['keep_extension']);
         $route = $this->createRoute($relativePath, $trimExtension);
 
+        // handle translations
+        $requestedLang = $this->extractLanguageFromUri();
+        $detectedlang = $this->extractLanguageFromPath($relativePath);
+        if($requestedLang == $detectedlang){
+            // rewrite route
+            $route = $this->changeRouteForTranslations($route, $detectedlang);
+            // use this in your templates
+            $data['language'] = $detectedlang;
+        } else {
+            // Skip 'foreign' items
+            return null;
+        }
+
         $data['path'] = $alias . '/' . $relativePath;
         $data['route'] = $route;
         $item = new Item($data);
@@ -221,5 +238,55 @@ class Builder
 
         // handle index route
         return ($route == 'index') ? '' : $route;
+    }
+
+    private function changeRouteForTranslations($route, $lang)
+    {
+        if( 'default' !== $lang )
+        {
+            $route = str_replace('/index.'.$lang, '', $route);
+            $route = str_replace('.'.$lang, '', $route);
+            $route = ( $route == 'index')
+                ? $lang
+                : $lang.DIRECTORY_SEPARATOR.$route;
+        }
+        return $route;
+    }
+
+    /**
+     * @param string $alias
+     * @return string
+     */
+    private function extractLanguageFromPath($alias)
+    {
+        $filename = basename($alias);
+        if (preg_match('/^.*\.([a-z]{2})\..*$/', $filename, $matches) ) {
+            if(in_array($matches[1], array('en'))) {
+                return $matches[1];
+            }
+        }
+        return 'default';
+    }
+
+    /**
+     * @return string
+     */
+    private function extractLanguageFromUri()
+    {
+        $lang = 'default';
+
+        if(isset($_REQUEST['L'])){
+            $requery = str_replace('L='.$_REQUEST['L'],'', $_SERVER['QUERY_STRING']);
+            $redirect = '/'.$_REQUEST['L'].str_replace($_SERVER['QUERY_STRING'], '', $_SERVER['REQUEST_URI']);
+            $redirect = rtrim($redirect, '\/?&');
+            die(header( 'Location: '.$redirect.($requery ? '?'.$requery : '') ));
+        }
+
+        $test = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
+        if($test[0] != '' && in_array($test[0], array('de','en'))){
+            $lang = $test[0];
+        };
+
+        return $lang;
     }
 }
